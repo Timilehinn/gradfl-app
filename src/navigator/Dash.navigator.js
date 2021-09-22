@@ -7,6 +7,7 @@ import { AuthContext } from '../contexts/authContextApi';
 import IconMC from 'react-native-vector-icons/MaterialCommunityIcons';
 import HomeScreen from '../screens/Dashboard/HomeScreen';
 import TwoScreen from '../screens/Dashboard/TwoScreen';
+import AddMoney from '../screens/Dashboard/AddMoney';
 import ProfileScreen from '../screens/Dashboard/ProfileScreen';
 import ThreeScreen from '../screens/Dashboard/ThreeScreen';
 import FaIcon from 'react-native-vector-icons/FontAwesome'
@@ -123,6 +124,10 @@ function AllTabs() {
       <Tab.Screen 
         name="Profile" 
         component={ProfileScreen} />
+
+<Tab.Screen 
+        name="Add Money" 
+        component={AddMoney} />
 
     </Tab.Navigator>
   );
