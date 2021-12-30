@@ -1,18 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Text, View, StyleSheet, Animated, Alert, TouchableOpacity, BackHandler } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { Text, View, StyleSheet, Animated, TouchableOpacity, BackHandler } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {useRoute, useFocusEffect, useIsFocused} from '@react-navigation/native';
 import { AuthContext } from '../contexts/authContextApi';
-import IconMC from 'react-native-vector-icons/MaterialCommunityIcons';
-import HomeScreen from '../screens/Dashboard/HomeScreen';
-import TwoScreen from '../screens/Dashboard/TwoScreen';
-import AddMoney from '../screens/Dashboard/AddMoney';
-import ProfileScreen from '../screens/Dashboard/ProfileScreen';
-import ThreeScreen from '../screens/Dashboard/ThreeScreen';
-import FaIcon from 'react-native-vector-icons/FontAwesome'
-import AntIcon from 'react-native-vector-icons/AntDesign';
-import FeatherIcon from 'react-native-vector-icons/Feather'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MyShop from '../screens/Dashboard/MyShop';
+import Payment from '../screens/Dashboard/Payment';
+import Orders from '../screens/Dashboard/Orders';
+import EntypoIcon from 'react-native-vector-icons/Entypo'
+import FontistoIcons from 'react-native-vector-icons/Fontisto'
 import * as RootNavigation from './RootNavigation'
 import { Button, Paragraph, Dialog, Portal, Provider } from 'react-native-paper';
 
@@ -23,7 +19,6 @@ function CustomTabBar(props) {
 
    const isActive = (index) =>{
         if(index == routeIndex){
-            
             return true
         }
    }
@@ -77,24 +72,19 @@ function CustomTabBar(props) {
           </Dialog>
         </Portal>
     <View style={styles.TabBarMainContainer}>
-        <TouchableOpacity onPress={()=>{props.navigation.navigate('Home'); setRouteIndex(0)}} activeOpacity={0.6} style={styles.button} >
-            <AntIcon name="home" color={isActive(0)? "rgb(41,42,60)" : "grey"} size={28} />
-            <Text style={{textAlign: 'center', fontWeight: isActive(0) && 'bold', color: isActive(0)? "rgb(41,42,60)" : "grey", fontSize: 11}}>Home</Text>
+        <TouchableOpacity onPress={()=>{props.navigation.navigate('MyShop'); setRouteIndex(0)}} activeOpacity={0.6} style={styles.button} >
+            <EntypoIcon name="shop" color={isActive(0)? "white" : "grey"} size={26} />
+            <Text style={{textAlign: 'center', fontWeight: isActive(0) && 'bold', color: isActive(0)? "white" : "grey", fontSize: 10}}>MyShop</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={()=>{props.navigation.navigate('Two'); setRouteIndex(1)}} activeOpacity={0.6} style={styles.button} >
-            <FeatherIcon name="briefcase" color={isActive(1)? "rgb(41,42,60)" : "grey"} size={27} />
-            <Text style={{textAlign: 'center', fontWeight: isActive(1) && 'bold', color: isActive(1)? "rgb(41,42,60)" : "grey", fontSize: 11}}>Screen 2</Text>
+        <TouchableOpacity onPress={()=>{props.navigation.navigate('Payment'); setRouteIndex(1)}} activeOpacity={0.6} style={styles.button} >
+            <MaterialIcons name="payment" color={isActive(1)? "white" : "grey"} size={25} />
+            <Text style={{textAlign: 'center', fontWeight: isActive(1) && 'bold', color: isActive(1)? "white" : "grey", fontSize: 10}}>Payment</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={()=>{props.navigation.navigate('Three'); setRouteIndex(2)}} activeOpacity={0.6} style={styles.button} >
-            <FeatherIcon name="list" color={isActive(2)? "rgb(41,42,60)" : "grey"} size={27} />
-            <Text style={{textAlign: 'center', fontWeight: isActive(2) && 'bold', color: isActive(2)? "rgb(41,42,60)" : "grey", fontSize: 11}}>Screen 3</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={()=>{props.navigation.navigate('Profile'); setRouteIndex(4)}} activeOpacity={0.6} style={styles.button} >
-            <AntIcon name="user" color={isActive(4)? "rgb(41,42,60)" : "grey"} size={30} />
-            <Text style={{textAlign: 'center', fontWeight: isActive(4) && 'bold', color: isActive(4)? "rgb(41,42,60)" : "grey", fontSize: 11}}>Me</Text>
+        <TouchableOpacity onPress={()=>{props.navigation.navigate('Orders'); setRouteIndex(2)}} activeOpacity={0.6} style={styles.button} >
+            <FontistoIcons name="shopping-bag-1" color={isActive(2)? "white" : "grey"} size={25} />
+            <Text style={{textAlign: 'center', fontWeight: isActive(2) && 'bold', color: isActive(2)? "white" : "grey", fontSize: 10}}>Orders</Text>
         </TouchableOpacity>
     </View>
     </>
@@ -110,25 +100,16 @@ function AllTabs() {
     }}  tabBar={(props) => <CustomTabBar {...props} />}>
 
       <Tab.Screen 
-        name="Home" 
-        component={HomeScreen} />
+        name="MyShop" 
+        component={MyShop} />
 
       <Tab.Screen 
-        name="Two" 
-        component={TwoScreen} />
+        name="Payment" 
+        component={Payment} />
 
       <Tab.Screen 
-        name="Three" 
-        component={ThreeScreen} />
-
-      <Tab.Screen 
-        name="Profile" 
-        component={ProfileScreen} />
-
-<Tab.Screen 
-        name="Add Money" 
-        component={AddMoney} />
-
+        name="Orders" 
+        component={Orders} />
     </Tab.Navigator>
   );
 }
@@ -141,34 +122,18 @@ export default function Dashboard() {
 
 const styles = StyleSheet.create({
  
-  // TabBarMainContainer :{
-  //   justifyContent: 'space-around', 
-  //   height: 55, 
-  //   flexDirection: 'row',
-  //   width: '65%',
-  //   borderRadius: 50,
-  //   position: 'absolute',
-  //   bottom: 40,
-  //   alignSelf: 'center',
-  //   alignItems: 'center',
-  //   backgroundColor: 'rgb(41,42,60)'
-  // },
-
   TabBarMainContainer :{
     justifyContent: 'space-around', 
-    height: 60, 
+    height: 55, 
     flexDirection: 'row',
-    width: '100%',
-    // borderTopRightRadius: 30,
-    // borderTopLeftRadius: 30,
-    // position: 'absolute',
-    bottom: 0,
+    width: '65%',
+    borderRadius: 50,
+    position: 'absolute',
+    bottom: 15,
     alignSelf: 'center',
     alignItems: 'center',
-    backgroundColor: 'white',
-    elevation: 5
+    backgroundColor: 'rgba(0, 0, 0, .8)'
   },
-
    
   button: {
     height: 50,

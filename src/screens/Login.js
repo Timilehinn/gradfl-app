@@ -1,52 +1,60 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { View, Text, Modal, TextInput, StyleSheet, ToastAndroid, Alert, ActivityIndicator, Image, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
-import FeatherIcons from 'react-native-vector-icons/Feather'
-import { HomeContext } from '../contexts/homeContextApi'
-import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
-import MAicons from 'react-native-vector-icons/MaterialCommunityIcons'
 import axios from '../util/util'
 import { AuthContext } from '../contexts/authContextApi';
 import * as RootNavigation from '../navigator/RootNavigation.js';
-// import Svg, { path } from 'react-native-svg';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-function Login({ navigation, userData }) {
-    const { login, setLogin, setRegister } = useContext(HomeContext);
+function Login() {
     const { auth, setAuth, setUserDetails } = useContext(AuthContext);
-    const [ username, setUsername ] = useState('')
+    const [ login, setLogin ] = useState(true)
+    const [ email, setEmail ] = useState('')
     const [ password, setPassword ] = useState('')
     const [ loading, setLoading ] = useState(false)
 
-    const switchRegister = () =>{
-      setRegister(true)
-      setTimeout(()=>{
-        setLogin(false)
-      },500)
-    }
-
-    const printLogin=()=>{
-      Alert.alert('Fingerprint Authentication', 'nothing yet :)')
-    }
-
-    const _login = ()=>{
-
-      if(!username || !password){
-        return ToastAndroid.showWithGravityAndOffset(
-          'All fields are required',
+    const Toast = (message)=>{
+      ToastAndroid.showWithGravityAndOffset(
+          message,
           ToastAndroid.LONG,
           ToastAndroid.BOTTOM,
           25,50
-        );
-      }
+      );
+    }
 
+    useEffect(()=>{
+      (async()=>{
+        const token = await AsyncStorage.getItem('@_gradfl_token');
+        axios.get('/user/isuserauth',{
+          headers: {
+            'x-access-token': token
+          }
+        }).then(res=>{
+          if(res.data.authenticated){
+            setUserDetails(res.data)
+            RootNavigation.navigate(
+              'Dashboard'
+            )
+          }
+        }).catch(err=>[
+          Toast('Session expired')
+        ])
+      })()
+    },[])
+
+    const _login = ()=>{
+      if(!email || !password){
+        return Toast('All fields are required')
+      }
       setLoading(true)
       axios.post('/user/auth/signin',{
-        username, password
+        email, password
       })
-      .then(res=>{
+      .then(async res=>{
         setLoading(false)
         setPassword('');
         setAuth(res.data.session);
         if(res.data.session){
+          await AsyncStorage.setItem('@_gradfl_token', res.data.token);
           setUserDetails(res.data)
           RootNavigation.navigate(
             'Dashboard'
@@ -57,27 +65,14 @@ function Login({ navigation, userData }) {
           }, 500)
           setLoading(false)
         }
-        ToastAndroid.showWithGravityAndOffset(
-          res.data.message,
-          ToastAndroid.LONG,
-          ToastAndroid.BOTTOM,
-          25,50
-        );
-        if(res.data?.ERR_CODE === 4315 ){  // incorrect password
-          // setAttempt(attempt + 1);
-          setPassword('')
-          setLoading(false)
-        }
+        Toast(res.data.message)
       })
       .catch(err=>{
         setLoading(false)
-        console.log(err.message);
-        ToastAndroid.showWithGravityAndOffset(
-          err.message,
-          ToastAndroid.LONG,
-          ToastAndroid.BOTTOM,
-          25,50
-        );
+        setPassword('')
+        setEmail('')
+        console.log(err);
+        Toast('Something went wrong')
         setPassword('')
       })
     }
@@ -92,34 +87,16 @@ function Login({ navigation, userData }) {
         }}
       >
         <View style={styles.centeredView}>
-              <View style={{width: '100%', flexDirection: 'row',  justifyContent: 'space-between', alignItems: 'center'}}>
-                <TouchableOpacity onPress={() => {setLogin(!login); setLoading(false)}} >
-                    <FeatherIcons name="x" color="black" size={30} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={()=>printLogin()}>
-                  <MAicons style={{alignSelf: 'center'}} size={50} name="fingerprint" color="black" />
-                </TouchableOpacity>
-              </View>
-              
-
               <View style={styles.main}>
-                <Text style={{color: 'black', margin: 15, fontSize: 30}}>Sign In</Text>
-                <TextInput style={styles.input} onChangeText={username=>setUsername(username)} placeholder="Username" placeholderTextColor="grey" />
+                <Text style={{color: 'black', marginLeft: 5, fontSize: 30}}>Welcome Back</Text>
+                <Text style={{color: 'grey', marginLeft: 5, fontSize: 15}}>Sign In to continue</Text>
+                <TextInput style={styles.input} onChangeText={email=>setEmail(email)} placeholder="Email" placeholderTextColor="grey" />
                 <TextInput style={styles.input} onChangeText={password=>setPassword(password)} secureTextEntry={true} placeholder="Password" placeholderTextColor="grey" />
-                <TouchableOpacity disabled={loading? true:false} onPress={()=>_login()} style={{...styles.loginButton, backgroundColor: loading? 'lightgrey' : '#3eb489'}}>
+                <TouchableOpacity disabled={loading? true:false} onPress={()=>_login()} style={{...styles.loginButton, backgroundColor: loading? 'lightgrey' : 'lightblue'}}>
                     {!loading && <Text style={{textAlign: 'center', color: 'white', fontWeight: 'bold'}}>SIGN IN</Text>}
                     {loading && <ActivityIndicator size={15} color="white" />}
                 </TouchableOpacity>
             </View>
-            <View style={{alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between'}}>
-              <TouchableOpacity onPress={()=>switchRegister()}>
-                  <Text style={{color: 'black', marginRight: 5}}>No account? Create one.</Text>
-              </TouchableOpacity>
-              <Text style={{fontSize: 12, color: 'grey'}}>
-                  help desk
-              </Text>
-            </View>
-          
         </View>
       </Modal>
     )
@@ -132,8 +109,6 @@ const styles = StyleSheet.create({
       alignItems: "center",
       height: '100%',
       width: '100%',
-      justifyContent: 'space-between',
-      // position: 'absolute',
       padding: 15,
       backgroundColor: 'white',
     },
@@ -155,10 +130,10 @@ const styles = StyleSheet.create({
     },
   
     main: {
-        alignItems: 'center',
+        alignItems: 'flex-start',
         backgroundColor: 'white',
-        width: '100%',
-        marginTop: -60
+        width: '90%',
+        marginTop: 160
     },
     bottom: {
         flex: 1.5,
@@ -171,16 +146,16 @@ const styles = StyleSheet.create({
     },
     input: {
         padding: 9,
-        borderWidth: .5,
+        borderBottomWidth: .5,
         color: 'black',
-        borderColor: 'lightgrey',
-        width: '80%',
+        borderBottomColor: 'lightgrey',
+        width: '100%',
         marginBottom: 30,
         borderRadius: 10,
       },
     loginButton: {
-      borderRadius: 10,
-      width: '80%',
+      // borderRadius: 10,
+      width: '100%',
       padding: 15,
       flexDirection: 'row',
       elevation: 2,

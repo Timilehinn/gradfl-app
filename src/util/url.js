@@ -1,0 +1,1 @@
+exports.baseurl = 'http://192.168.43.224:5454/v1'
